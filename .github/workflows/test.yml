@@ -1,0 +1,39 @@
+# Checks the casks of this tap on macOS: style, audit, then a real install and uninstall.
+name: Test casks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tap this checkout
+        run: |
+          brew tap robertod91/tap "$GITHUB_WORKSPACE"
+          brew tap-info robertod91/tap
+
+      - name: Style and audit
+        run: |
+          brew style --cask robertod91/tap/iconvader
+          brew audit --cask --online robertod91/tap/iconvader
+
+      - name: Install, verify, uninstall
+        run: |
+          brew install --cask robertod91/tap/iconvader
+          SAVER="$HOME/Library/Screen Savers/IcoNVader.saver"
+          test -d "$SAVER"
+          codesign --verify --strict --verbose=2 "$SAVER"
+          codesign -dv --verbose=2 "$SAVER" 2>&1 | grep -E "Authority=Developer ID|TeamIdentifier"
+          xcrun stapler validate "$SAVER"
+          plutil -extract CFBundleShortVersionString raw "$SAVER/Contents/Info.plist"
+          brew uninstall --cask --zap robertod91/tap/iconvader
+          test ! -e "$SAVER"

@@ -35,6 +35,9 @@ jobs:
         run: brew trust robertod91/tap
 
       - name: Audit
+        env:
+          # Read-only workflow token: avoids the 60 requests/hour limit for anonymous GitHub API calls
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
         run: brew audit --cask --online robertod91/tap/iconvader
 
       - name: Install, verify, uninstall

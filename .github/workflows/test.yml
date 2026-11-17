@@ -21,10 +21,22 @@ jobs:
           brew tap robertod91/tap "$GITHUB_WORKSPACE"
           brew tap-info robertod91/tap
 
-      - name: Style and audit
+      - name: Style
+        run: brew style --cask robertod91/tap/iconvader
+
+      # Recent Homebrew versions only load casks from trusted third-party taps. This step shows
+      # what a user sees when installing without `brew trust` (it is allowed to fail).
+      - name: Install without trusting the tap (informational)
+        continue-on-error: true
         run: |
-          brew style --cask robertod91/tap/iconvader
-          brew audit --cask --online robertod91/tap/iconvader
+          brew install --cask robertod91/tap/iconvader
+          brew uninstall --cask robertod91/tap/iconvader
+
+      - name: Trust the tap
+        run: brew trust robertod91/tap
+
+      - name: Audit
+        run: brew audit --cask --online robertod91/tap/iconvader
 
       - name: Install, verify, uninstall
         run: |

@@ -24,10 +24,9 @@ jobs:
       - name: Style
         run: brew style --cask robertod91/tap/iconvader
 
-      # Recent Homebrew versions only load casks from trusted third-party taps. This step shows
-      # what a user sees when installing without `brew trust` (it is allowed to fail).
-      - name: Install without trusting the tap (informational)
-        continue-on-error: true
+      # Users install without `brew trust`: that must keep working. Only `brew audit` (maintainer
+      # tool) refuses to load casks from untrusted third-party taps, so the tap is trusted after this.
+      - name: Install as a user would (tap not trusted)
         run: |
           brew install --cask robertod91/tap/iconvader
           brew uninstall --cask robertod91/tap/iconvader
